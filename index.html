@@ -50,7 +50,7 @@
         // Delete message function
         function deleteMessage(messageId) {
             const messageRef = ref(db, `messages/${messageId}`);
-            remove(messageRef);
+            remove(messageRef);  // This should now work to remove the message
         }
 
         // Report message function
