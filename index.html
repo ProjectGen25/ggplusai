@@ -3,49 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chatbot</title>
+    <title>GitGames+ AI Chat</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        #chat-container { width: 90%; max-width: 600px; margin: auto; border: 1px solid #ccc; padding: 10px; height: 500px; overflow-y: scroll; }
-        .message { margin: 5px; padding: 10px; border-radius: 5px; }
-        .user { background: #007bff; color: white; text-align: right; }
-        .ai { background: #e0e0e0; text-align: left; }
-        input, button { margin: 10px; padding: 10px; }
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 10px;
+        }
+
+        .user-name {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .message-text {
+            background-color: #e2e2e2;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .input-area {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>Chat with AI</h1>
-    <div id="chat-container"></div>
-    <input type="text" id="user-input" placeholder="Type your message...">
-    <button onclick="sendMessage()">Send</button>
 
-    <script>
-        async function sendMessage() {
-            let input = document.getElementById("user-input").value;
-            if (!input) return;
+<div class="chat-container" id="chat-container">
+    <div id="name-prompt">
+        <label for="username">Enter your name:</label>
+        <input type="text" id="username" placeholder="Your name">
+        <button onclick="startChat()">Start Chat</button>
+    </div>
+    <div id="chat-messages"></div>
+    <div class="input-area" style="display: none;" id="message-area">
+        <textarea id="message-input" placeholder="Type a message..." rows="3"></textarea>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
 
-            let chatContainer = document.getElementById("chat-container");
-            chatContainer.innerHTML += `<div class="message user">${input}</div>`;
-            document.getElementById("user-input").value = "";
+<script>
+    let username = "";
 
-            let response = await fetch("https://api.openai.com/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer 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"
-                },
-                body: JSON.stringify({
-                    model: "gpt-3.5-turbo",
-                    messages: [{ role: "user", content: input }]
-                })
-            });
-
-            let data = await response.json();
-            let aiMessage = data.choices[0].message.content;
-
-            chatContainer.innerHTML += `<div class="message ai">${aiMessage}</div>`;
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+    function startChat() {
+        username = document.getElementById("username").value.trim();
+        if (username) {
+            document.getElementById("name-prompt").style.display = "none";
+            document.getElementById("message-area").style.display = "block";
         }
-    </script>
+    }
+
+    function sendMessage() {
+        const messageText = document.getElementById("message-input").value.trim();
+        if (messageText) {
+            const messageContainer = document.createElement("div");
+            messageContainer.classList.add("message");
+
+            const nameDisplay = document.createElement("div");
+            nameDisplay.classList.add("user-name");
+            nameDisplay.textContent = username;
+
+            const messageDisplay = document.createElement("div");
+            messageDisplay.classList.add("message-text");
+            messageDisplay.textContent = messageText;
+
+            messageContainer.appendChild(nameDisplay);
+            messageContainer.appendChild(messageDisplay);
+            document.getElementById("chat-messages").appendChild(messageContainer);
+
+            document.getElementById("message-input").value = "";
+        }
+    }
+</script>
+
 </body>
 </html>
