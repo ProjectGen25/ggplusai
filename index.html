@@ -3,124 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitGames+ Chat</title>
+    <title>GG+ Chat</title>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAUaIpNSyCl8upT6Y4CRV3Kpf1WliY_RgU",
+            authDomain: "gitgamesplus.firebaseapp.com",
+            databaseURL: "https://gitgamesplus-default-rtdb.firebaseio.com",
+            projectId: "gitgamesplus",
+            storageBucket: "gitgamesplus.firebasestorage.app",
+            messagingSenderId: "65136458070",
+            appId: "1:65136458070:web:efa231005bc41e6a743ef7",
+            measurementId: "G-YXYSEMK09X"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Ask for username
+        let username = localStorage.getItem("ggplus_username");
+        if (!username) {
+            username = prompt("Enter your name:");
+            localStorage.setItem("ggplus_username", username);
+        }
+
+        // Send message function
+        function sendMessage() {
+            const messageInput = document.getElementById("message-input");
+            const message = messageInput.value.trim();
+            if (message) {
+                const timestamp = new Date().toLocaleString();
+                push(ref(db, "messages"), {
+                    user: username,
+                    text: message,
+                    time: timestamp
+                });
+                messageInput.value = "";
+            }
+        }
+
+        // Load messages function
+        function loadMessages() {
+            const messagesDiv = document.getElementById("messages");
+            onValue(ref(db, "messages"), (snapshot) => {
+                messagesDiv.innerHTML = "";
+                snapshot.forEach(childSnapshot => {
+                    const msg = childSnapshot.val();
+                    const messageElement = document.createElement("div");
+                    messageElement.classList.add("message");
+                    messageElement.innerHTML = `<strong>${msg.user}:</strong> ${msg.text} <span class="timestamp">${msg.time}</span>`;
+                    messagesDiv.appendChild(messageElement);
+                });
+                messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to latest message
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("send-btn").addEventListener("click", sendMessage);
+            loadMessages();
+        });
+
+    </script>
+
     <style>
-        .chat-container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background-color: #f9f9f9;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
         }
-
+        #chat-container {
+            width: 90%;
+            max-width: 500px;
+            margin: 20px auto;
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+            text-align: left;
+        }
         .message {
-            margin-bottom: 10px;
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: #333;
         }
-
-        .user-name {
+        .timestamp {
             font-size: 12px;
-            color: #555;
-            margin-bottom: 5px;
+            color: #888;
+            float: right;
         }
-
-        .message-text {
-            background-color: #e2e2e2;
-            padding: 10px;
+        #message-input {
+            width: 70%;
+            padding: 8px;
+            border: none;
             border-radius: 5px;
         }
-
-        .timestamp {
-            font-size: 10px;
-            color: #888;
+        #send-btn {
+            padding: 8px 15px;
+            background: #007BFF;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
         }
-
-        .input-area {
-            margin-top: 20px;
+        #send-btn:hover {
+            background: #0056b3;
         }
     </style>
 </head>
 <body>
 
-<div class="chat-container" id="chat-container">
-    <div id="name-prompt">
-        <label for="username">Enter your name:</label>
-        <input type="text" id="username" placeholder="Your name">
-        <button onclick="startChat()">Start Chat</button>
+    <h1>Welcome to GG+ Chat</h1>
+    <div id="chat-container">
+        <div id="messages"></div>
+        <input type="text" id="message-input" placeholder="Type a message...">
+        <button id="send-btn">Send</button>
     </div>
-    <div id="chat-messages"></div>
-    <div class="input-area" style="display: none;" id="message-area">
-        <textarea id="message-input" placeholder="Type a message..." rows="3"></textarea>
-        <button onclick="sendMessage()">Send</button>
-    </div>
-</div>
-
-<script>
-// Store the username in localStorage
-let username = "";
-
-// Load previous messages from localStorage when the page is loaded
-window.onload = function() {
-    if (localStorage.getItem("messages")) {
-        document.getElementById("chat-messages").innerHTML = localStorage.getItem("messages");
-    }
-    // Start auto-refresh every 2.5 seconds to check for new messages
-    setInterval(loadMessages, 2500);
-};
-
-function startChat() {
-    username = document.getElementById("username").value.trim();
-    if (username) {
-        document.getElementById("name-prompt").style.display = "none";
-        document.getElementById("message-area").style.display = "block";
-    }
-}
-
-function sendMessage() {
-    const messageText = document.getElementById("message-input").value.trim();
-    if (messageText) {
-        const messageContainer = document.createElement("div");
-        messageContainer.classList.add("message");
-
-        const nameDisplay = document.createElement("div");
-        nameDisplay.classList.add("user-name");
-        nameDisplay.textContent = username;
-
-        const messageDisplay = document.createElement("div");
-        messageDisplay.classList.add("message-text");
-        messageDisplay.textContent = messageText;
-
-        // Add timestamp to each message
-        const timestamp = document.createElement("div");
-        timestamp.classList.add("timestamp");
-        const now = new Date();
-        timestamp.textContent = now.toLocaleString();  // Formats the date and time
-
-        messageContainer.appendChild(nameDisplay);
-        messageContainer.appendChild(messageDisplay);
-        messageContainer.appendChild(timestamp);
-        
-        // Append the new message to the chat
-        const chatMessages = document.getElementById("chat-messages");
-        chatMessages.appendChild(messageContainer);
-
-        // Save the updated chat to localStorage
-        localStorage.setItem("messages", chatMessages.innerHTML);
-
-        // Clear the input field
-        document.getElementById("message-input").value = "";
-    }
-}
-
-// Function to reload messages from localStorage
-function loadMessages() {
-    const savedMessages = localStorage.getItem("messages");
-    if (savedMessages && document.getElementById("chat-messages").innerHTML !== savedMessages) {
-        document.getElementById("chat-messages").innerHTML = savedMessages;
-    }
-}
-</script>
 
 </body>
 </html>
