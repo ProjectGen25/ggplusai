@@ -31,6 +31,11 @@
             border-radius: 5px;
         }
 
+        .timestamp {
+            font-size: 10px;
+            color: #888;
+        }
+
         .input-area {
             margin-top: 20px;
         }
@@ -52,37 +57,57 @@
 </div>
 
 <script>
-    let username = "";
+// Store the username in localStorage
+let username = "";
 
-    function startChat() {
-        username = document.getElementById("username").value.trim();
-        if (username) {
-            document.getElementById("name-prompt").style.display = "none";
-            document.getElementById("message-area").style.display = "block";
-        }
+// When the page is loaded, check if there are saved messages in localStorage
+window.onload = function() {
+    if (localStorage.getItem("messages")) {
+        document.getElementById("chat-messages").innerHTML = localStorage.getItem("messages");
     }
+};
 
-    function sendMessage() {
-        const messageText = document.getElementById("message-input").value.trim();
-        if (messageText) {
-            const messageContainer = document.createElement("div");
-            messageContainer.classList.add("message");
-
-            const nameDisplay = document.createElement("div");
-            nameDisplay.classList.add("user-name");
-            nameDisplay.textContent = username;
-
-            const messageDisplay = document.createElement("div");
-            messageDisplay.classList.add("message-text");
-            messageDisplay.textContent = messageText;
-
-            messageContainer.appendChild(nameDisplay);
-            messageContainer.appendChild(messageDisplay);
-            document.getElementById("chat-messages").appendChild(messageContainer);
-
-            document.getElementById("message-input").value = "";
-        }
+function startChat() {
+    username = document.getElementById("username").value.trim();
+    if (username) {
+        document.getElementById("name-prompt").style.display = "none";
+        document.getElementById("message-area").style.display = "block";
     }
+}
+
+function sendMessage() {
+    const messageText = document.getElementById("message-input").value.trim();
+    if (messageText) {
+        const messageContainer = document.createElement("div");
+        messageContainer.classList.add("message");
+
+        const nameDisplay = document.createElement("div");
+        nameDisplay.classList.add("user-name");
+        nameDisplay.textContent = username;
+
+        const messageDisplay = document.createElement("div");
+        messageDisplay.classList.add("message-text");
+        messageDisplay.textContent = messageText;
+
+        // Add timestamp to each message
+        const timestamp = document.createElement("div");
+        timestamp.classList.add("timestamp");
+        const now = new Date();
+        timestamp.textContent = now.toLocaleString();  // Formats the date and time
+
+        messageContainer.appendChild(nameDisplay);
+        messageContainer.appendChild(messageDisplay);
+        messageContainer.appendChild(timestamp);
+        
+        document.getElementById("chat-messages").appendChild(messageContainer);
+
+        // Save the updated chat to localStorage
+        localStorage.setItem("messages", document.getElementById("chat-messages").innerHTML);
+
+        // Clear the input field
+        document.getElementById("message-input").value = "";
+    }
+}
 </script>
 
 </body>
