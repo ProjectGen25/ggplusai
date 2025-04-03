@@ -74,7 +74,7 @@
                 body: JSON.stringify(payload)
             });
 
-            alert("Message reported!");
+            alert("Message flagged!");
         }
 
         // Load messages function
@@ -89,9 +89,20 @@
                     messageElement.classList.add("message");
                     messageElement.innerHTML = `
                         <strong>${msg.user}:</strong> ${msg.text} <span class="timestamp">${msg.time}</span>
-                        <button class="delete-btn" onclick="deleteMessage('${messageId}')">Delete</button>
-                        <button class="report-btn" onclick="reportMessage('${messageId}', ${JSON.stringify(msg)})">Report</button>
                     `;
+                    
+                    // Check if the current user is the one who sent the message
+                    if (msg.user === username) {
+                        messageElement.innerHTML += `
+                            <button class="delete-btn" onclick="deleteMessage('${messageId}')">
+                                🗑️
+                            </button>
+                            <button class="report-btn" onclick="reportMessage('${messageId}', ${JSON.stringify(msg)})">
+                                🚩
+                            </button>
+                        `;
+                    }
+
                     messagesDiv.appendChild(messageElement);
                 });
                 messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to latest message
@@ -145,17 +156,16 @@
         .delete-btn, .report-btn {
             position: absolute;
             top: 5px;
-            right: 5px;
             background-color: #ff4d4d;
             color: white;
             border: none;
-            padding: 5px;
-            border-radius: 5px;
+            padding: 3px 6px;
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
         }
         .delete-btn {
-            right: 70px;
+            right: 35px;
         }
         .delete-btn:hover {
             background-color: #cc0000;
