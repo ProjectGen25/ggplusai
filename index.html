@@ -7,7 +7,7 @@
     <script type="module">
         // Import Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -47,6 +47,36 @@
             }
         }
 
+        // Delete message function
+        function deleteMessage(messageId) {
+            const messageRef = ref(db, `messages/${messageId}`);
+            remove(messageRef);
+        }
+
+        // Report message function
+        async function reportMessage(messageId, messageData) {
+            const webhookUrl = 'https://discord.com/api/webhooks/1357496704131141793/6mdKBrSxciAGgBQyWJ0iQbeTk0nUYKlbrsQqoKIrNb0gfpKW2LSHS3nU8Ms1_sB9VV53';
+            const reportEmbed = {
+                title: "Reported Message",
+                description: `User: ${messageData.user}\nMessage: ${messageData.text}\nTime: ${messageData.time}`,
+                color: 16711680 // Red color
+            };
+
+            const payload = {
+                embeds: [reportEmbed]
+            };
+
+            await fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            alert("Message reported!");
+        }
+
         // Load messages function
         function loadMessages() {
             const messagesDiv = document.getElementById("messages");
@@ -54,9 +84,14 @@
                 messagesDiv.innerHTML = "";
                 snapshot.forEach(childSnapshot => {
                     const msg = childSnapshot.val();
+                    const messageId = childSnapshot.key;
                     const messageElement = document.createElement("div");
                     messageElement.classList.add("message");
-                    messageElement.innerHTML = `<strong>${msg.user}:</strong> ${msg.text} <span class="timestamp">${msg.time}</span>`;
+                    messageElement.innerHTML = `
+                        <strong>${msg.user}:</strong> ${msg.text} <span class="timestamp">${msg.time}</span>
+                        <button class="delete-btn" onclick="deleteMessage('${messageId}')">Delete</button>
+                        <button class="report-btn" onclick="reportMessage('${messageId}', ${JSON.stringify(msg)})">Report</button>
+                    `;
                     messagesDiv.appendChild(messageElement);
                 });
                 messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to latest message
@@ -100,11 +135,36 @@
             padding: 5px 10px;
             border-radius: 5px;
             background: #333;
+            position: relative;
         }
         .timestamp {
             font-size: 12px;
             color: #888;
             float: right;
+        }
+        .delete-btn, .report-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .delete-btn {
+            right: 70px;
+        }
+        .delete-btn:hover {
+            background-color: #cc0000;
+        }
+        .report-btn {
+            right: 5px;
+        }
+        .report-btn:hover {
+            background-color: #ff1a1a;
         }
         #message-input {
             width: 70%;
