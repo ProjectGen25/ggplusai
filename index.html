@@ -56,7 +56,7 @@
                     const msg = childSnapshot.val();
                     const messageElement = document.createElement("div");
                     messageElement.classList.add("message");
-                    messageElement.innerHTML = <strong>${msg.user}:</strong> ${msg.text} <span class="timestamp">${msg.time}</span>;
+                    messageElement.innerHTML = `<strong>${msg.user}:</strong> ${msg.text} <span class="timestamp">${msg.time}</span>`;
                     messagesDiv.appendChild(messageElement);
                 });
                 messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to latest message
