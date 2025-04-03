@@ -79,6 +79,11 @@
 
         // On page load
         document.addEventListener("DOMContentLoaded", () => {
+            const userName = prompt("Please enter your name:");
+
+            // Set the user's name (this can be changed later)
+            document.getElementById("user-name").value = userName || "Anonymous";
+
             loadMessages(); // Load messages
             document.getElementById("send-btn").addEventListener("click", sendMessage);
         });
@@ -141,7 +146,7 @@
 
     <h1>GG+ Chat</h1>
     <div id="chat-container">
-        <input type="text" id="user-name" placeholder="Enter your name...">
+        <input type="text" id="user-name" placeholder="Enter your name..." readonly>
         <div id="messages"></div>
         <input type="text" id="message-input" placeholder="Type a message...">
         <button id="send-btn">Send</button>
