@@ -60,11 +60,13 @@
 // Store the username in localStorage
 let username = "";
 
-// When the page is loaded, check if there are saved messages in localStorage
+// Load previous messages from localStorage when the page is loaded
 window.onload = function() {
     if (localStorage.getItem("messages")) {
         document.getElementById("chat-messages").innerHTML = localStorage.getItem("messages");
     }
+    // Start auto-refresh every 2.5 seconds to check for new messages
+    setInterval(loadMessages, 2500);
 };
 
 function startChat() {
@@ -99,13 +101,23 @@ function sendMessage() {
         messageContainer.appendChild(messageDisplay);
         messageContainer.appendChild(timestamp);
         
-        document.getElementById("chat-messages").appendChild(messageContainer);
+        // Append the new message to the chat
+        const chatMessages = document.getElementById("chat-messages");
+        chatMessages.appendChild(messageContainer);
 
         // Save the updated chat to localStorage
-        localStorage.setItem("messages", document.getElementById("chat-messages").innerHTML);
+        localStorage.setItem("messages", chatMessages.innerHTML);
 
         // Clear the input field
         document.getElementById("message-input").value = "";
+    }
+}
+
+// Function to reload messages from localStorage
+function loadMessages() {
+    const savedMessages = localStorage.getItem("messages");
+    if (savedMessages && document.getElementById("chat-messages").innerHTML !== savedMessages) {
+        document.getElementById("chat-messages").innerHTML = savedMessages;
     }
 }
 </script>
