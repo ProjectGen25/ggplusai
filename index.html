@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #chat-container { width: 90%; max-width: 600px; margin: auto; border: 1px solid #ccc; padding: 10px; height: 500px; overflow-y: scroll; }
+        .message { margin: 5px; padding: 10px; border-radius: 5px; }
+        .user { background: #007bff; color: white; text-align: right; }
+        .ai { background: #e0e0e0; text-align: left; }
+        input, button { margin: 10px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Chat with AI</h1>
+    <div id="chat-container"></div>
+    <input type="text" id="user-input" placeholder="Type your message...">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        async function sendMessage() {
+            let input = document.getElementById("user-input").value;
+            if (!input) return;
+
+            let chatContainer = document.getElementById("chat-container");
+            chatContainer.innerHTML += `<div class="message user">${input}</div>`;
+            document.getElementById("user-input").value = "";
+
+            let response = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer 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"
+                },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [{ role: "user", content: input }]
+                })
+            });
+
+            let data = await response.json();
+            let aiMessage = data.choices[0].message.content;
+
+            chatContainer.innerHTML += `<div class="message ai">${aiMessage}</div>`;
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
