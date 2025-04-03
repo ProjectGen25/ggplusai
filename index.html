@@ -4,89 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GG+ Chat</title>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"></script>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-    <script>
-        // Initialize Firebase
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAUaIpNSyCl8upT6Y4CRV3Kpf1WliY_RgU",
             authDomain: "gitgamesplus.firebaseapp.com",
             databaseURL: "https://gitgamesplus-default-rtdb.firebaseio.com",
             projectId: "gitgamesplus",
-            storageBucket: "gitgamesplus.appspot.com",
+            storageBucket: "gitgamesplus.firebasestorage.app",
             messagingSenderId: "65136458070",
             appId: "1:65136458070:web:efa231005bc41e6a743ef7",
             measurementId: "G-YXYSEMK09X"
         };
 
         // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        // Swear words list
-        const swearWords = [
-            "fuck", "bitch", "shit", "asshole", "damn", "bastard", "slut", "cunt", "whore", "motherfucker", 
-            "dick", "pussy", "cock", "tits", "douchebag", "fag", "faggot", "queer", "retard", "crackhead", 
-            "shithead", "bimbo", "jizz", "cum", "piss", "twat", "nigger", "chink", "gook", "spic", "kike", 
-            "raghead", "sandnigger", "wetback", "nigga", "beaner", "tranny", "dyke", "lesbo", "faggy", 
-            "cocksucker", "bastards", "dickhead", "shitbag", "assbag", "asswipe", "cockhead", "buttfuck", 
-            "dildo", "cocktail", "clit", "fucking", "shitfaced", "sonofabitch", "whorehouse", "assclown", 
-            "ballbag", "ballsack", "fuckhead", "pussyhole", "choad", "dickwad", "motherfucking", "nutbag", 
-            "shitstain", "turd", "spunk", "semen", "skank", "sleazebag", "manwhore", "shemale", "butthurt"
-        ];
-
-        // Function to replace swear words with asterisks
-        function filterSwearWords(message) {
-            for (let word of swearWords) {
-                const regex = new RegExp(`\\b${word}\\b`, 'gi');
-                message = message.replace(regex, '*'.repeat(word.length));
-            }
-            return message;
+        // Ask for username
+        let username = localStorage.getItem("ggplus_username");
+        if (!username) {
+            username = prompt("Enter your name:");
+            localStorage.setItem("ggplus_username", username);
         }
 
-        // Function to handle sending a message
+        // Send message function
         function sendMessage() {
             const messageInput = document.getElementById("message-input");
-            const userName = document.getElementById("user-name").value || "Anonymous"; // Default name if not provided
             const message = messageInput.value.trim();
-
             if (message) {
-                const filteredMessage = filterSwearWords(message);
-                const messageData = {
-                    user: userName,
-                    message: filteredMessage,
-                    timestamp: new Date().toISOString()
-                };
-
-                // Save the message to Firebase
-                const newMessageRef = database.ref('messages').push();
-                newMessageRef.set(messageData);
-                messageInput.value = ""; // Clear the input
+                const timestamp = new Date().toLocaleString();
+                push(ref(db, "messages"), {
+                    user: username,
+                    text: message,
+                    time: timestamp
+                });
+                messageInput.value = "";
             }
         }
 
-        // Function to load messages from Firebase
+        // Load messages function
         function loadMessages() {
-            const messagesRef = database.ref('messages');
-            messagesRef.on('child_added', (snapshot) => {
-                const messageData = snapshot.val();
-                const messageElement = document.createElement("div");
-                messageElement.innerHTML = `<strong>${messageData.user}:</strong> ${messageData.message} <em>(${new Date(messageData.timestamp).toLocaleString()})</em>`;
-                document.getElementById("messages").appendChild(messageElement);
+            const messagesDiv = document.getElementById("messages");
+            onValue(ref(db, "messages"), (snapshot) => {
+                messagesDiv.innerHTML = "";
+                snapshot.forEach(childSnapshot => {
+                    const msg = childSnapshot.val();
+                    const messageElement = document.createElement("div");
+                    messageElement.classList.add("message");
+                    messageElement.innerHTML = `<strong>${msg.user}:</strong> ${msg.text} <span class="timestamp">${msg.time}</span>`;
+                    messagesDiv.appendChild(messageElement);
+                });
+                messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to latest message
             });
         }
 
-        // On page load
         document.addEventListener("DOMContentLoaded", () => {
-            const userName = prompt("Please enter your name:");
-
-            // Set the user's name (this can be changed later)
-            document.getElementById("user-name").value = userName || "Anonymous";
-
-            loadMessages(); // Load messages
             document.getElementById("send-btn").addEventListener("click", sendMessage);
+            loadMessages();
         });
+
     </script>
 
     <style>
@@ -114,6 +95,17 @@
             padding-bottom: 10px;
             text-align: left;
         }
+        .message {
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: #333;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+            float: right;
+        }
         #message-input {
             width: 70%;
             padding: 8px;
@@ -131,22 +123,12 @@
         #send-btn:hover {
             background: #0056b3;
         }
-        #user-name {
-            width: 70%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: #333;
-            color: white;
-        }
     </style>
 </head>
 <body>
 
-    <h1>GG+ Chat</h1>
+    <h1>Welcome to GG+ Chat</h1>
     <div id="chat-container">
-        <input type="text" id="user-name" placeholder="Enter your name..." readonly>
         <div id="messages"></div>
         <input type="text" id="message-input" placeholder="Type a message...">
         <button id="send-btn">Send</button>
