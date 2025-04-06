@@ -32,13 +32,16 @@
             localStorage.setItem("ggplus_username", username);
         }
 
-        // Function to detect mentions in the format @username (full name, must include @)
-        function detectMentions(message) {
-            const regex = /@([a-zA-Z0-9_]+)/g; // Regex to match @username format
-            return regex.test(message);  // Returns true if a mention is found
+        // Check if the username is Fortnite.gov (case-sensitive)
+        const isAdmin = username === "Fortnite.gov";
+
+        // Show admin panel if user is Fortnite.gov
+        function showAdminPanel() {
+            const adminPanel = document.getElementById("admin-panel");
+            adminPanel.style.display = "block";  // Show the admin panel
         }
 
-        // Send message function
+        // Detect if the message is '/open' and allow access to the admin panel for Fortnite.gov
         function sendMessage() {
             const messageInput = document.getElementById("message-input");
             const message = messageInput.value.trim();
@@ -49,6 +52,12 @@
                     text: message,
                     time: timestamp
                 });
+
+                // Check if the message is "/open" and show the admin panel
+                if (message.toLowerCase() === "/open" && isAdmin) {
+                    showAdminPanel();
+                }
+
                 messageInput.value = "";
             }
         }
@@ -63,11 +72,7 @@
                     const messageElement = document.createElement("div");
                     messageElement.classList.add("message");
 
-                    // Check for exact @mention (i.e., must include @ and match the full name)
-                    if (detectMentions(msg.text)) {
-                        messageElement.classList.add("highlighted");
-                    }
-
+                    // Display message
                     messageElement.innerHTML = `<strong>${msg.user}:</strong> ${msg.text} <span class="timestamp">${msg.time}</span>`;
                     messagesDiv.appendChild(messageElement);
                 });
@@ -136,9 +141,22 @@
             background: #0056b3;
         }
 
-        /* Style for highlighting entire messages with @mentions */
-        .highlighted {
-            background-color: yellow;
+        /* Style for admin panel */
+        #admin-panel {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #222;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .admin-section {
+            margin: 10px 0;
+            padding: 10px;
+            background: #333;
+            border-radius: 5px;
+            text-align: left;
         }
     </style>
 </head>
@@ -149,6 +167,15 @@
         <div id="messages"></div>
         <input type="text" id="message-input" placeholder="Type a message...">
         <button id="send-btn">Send</button>
+    </div>
+
+    <!-- Admin Panel (only visible for Fortnite.gov) -->
+    <div id="admin-panel">
+        <h2>Admin Panel</h2>
+        <div class="admin-section">
+            <p><strong>Welcome, Admin!</strong></p>
+            <p>You can manage the site and access special admin features here.</p>
+        </div>
     </div>
 
 </body>
