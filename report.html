@@ -3,167 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report a User</title>
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
-
+    <title>Report a User - GG+ Chat</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #121212;
             color: white;
-            margin: 0;
-            padding: 0;
             text-align: center;
+            padding: 20px;
         }
-
-        h1 {
-            color: #4CAF50;
-            margin-top: 50px;
-        }
-
-        .container {
-            width: 80%;
+        #report-container {
             max-width: 600px;
             margin: 0 auto;
-            background-color: #1e1e1e;
+            background: #1e1e1e;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
-
-        input, textarea, button {
+        input, textarea {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
             border-radius: 5px;
             border: 1px solid #555;
-            background-color: #333;
-            color: white;
         }
-
         button {
             background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            border-radius: 5px;
         }
-
         button:hover {
             background-color: #0056b3;
-        }
-
-        label {
-            text-align: left;
-            font-size: 16px;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .submit-btn {
-            background-color: #FF6347;
-        }
-
-        .submit-btn:hover {
-            background-color: #e53e36;
-        }
-
-        .footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #888;
         }
     </style>
 </head>
 <body>
 
     <h1>Report a User</h1>
-
-    <div class="container">
+    <div id="report-container">
         <form id="report-form">
-            <label for="your-name">Your Name:</label>
-            <input type="text" id="your-name" name="your-name" required>
-
-            <label for="reported-name">Reported User:</label>
-            <input type="text" id="reported-name" name="reported-name" required>
-
-            <label for="reported-message">Reported Message:</label>
-            <textarea id="reported-message" name="reported-message" rows="4" required></textarea>
-
-            <button type="submit" class="submit-btn">Submit Report</button>
+            <input type="text" id="reporter-name" placeholder="Your Name" required><br>
+            <input type="text" id="reported-name" placeholder="Reported User's Name" required><br>
+            <textarea id="reported-message" placeholder="What message(s) are you reporting?" rows="5" required></textarea><br>
+            <button type="submit">Submit Report</button>
         </form>
     </div>
 
-    <div class="footer">
-        <p>© 2025 Report System</p>
-    </div>
-
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID",
-            measurementId: "YOUR_MEASUREMENT_ID"
-        };
+        document.getElementById("report-form").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent form from refreshing page
 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const storage = firebase.storage();
+            // Get form data
+            const reporterName = document.getElementById("reporter-name").value;
+            const reportedName = document.getElementById("reported-name").value;
+            const reportedMessage = document.getElementById("reported-message").value;
 
-        document.getElementById('report-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const yourName = document.getElementById('your-name').value;
-            const reportedName = document.getElementById('reported-name').value;
-            const reportedMessage = document.getElementById('reported-message').value;
-
-            // Prepare the payload to send to Discord
+            // Prepare the data to send to Discord webhook
             const reportData = {
-                username: yourName,
-                reportedUser: reportedName,
-                message: reportedMessage
+                content: `**Report Received**\n\n**Reporter Name**: ${reporterName}\n**Reported User**: ${reportedName}\n**Reported Message**: ${reportedMessage}`
             };
 
-            // Send the report to Discord
-            sendToDiscord(reportData);
-        });
-
-        function sendToDiscord(reportData) {
-            const webhookUrl = "https://discord.com/api/webhooks/1357496704131141793/6mdKBrSxciAGgBQyWJ0iQbeTk0nUYKlbrsQqoKIrNb0gfpKW2LSHS3nU8Ms1_sB9VV53";
-            
-            const payload = {
-                username: "Report Bot",
-                embeds: [{
-                    title: "User Report",
-                    description: `**Reported User**: ${reportData.reportedUser}\n**Reported By**: ${reportData.username}\n**Message**: ${reportData.message}`,
-                    color: 0xFF0000,
-                    timestamp: new Date(),
-                }]
-            };
-
-            fetch(webhookUrl, {
-                method: 'POST',
+            // Send the data to the Discord webhook
+            fetch("https://discord.com/api/webhooks/1357496704131141793/6mdKBrSxciAGgBQyWJ0iQbeTk0nUYKlbrsQqoKIrNb0gfpKW2LSHS3nU8Ms1_sB9VV53", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json"
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(reportData)
             })
             .then(response => {
                 if (response.ok) {
                     alert("Report submitted successfully!");
+                    window.location.href = "index.html"; // Redirect back to chat
                 } else {
-                    alert("Failed to submit the report.");
+                    alert("Failed to submit report. Please try again.");
                 }
             })
             .catch(error => {
-                alert("Error sending report: " + error);
+                console.error("Error:", error);
+                alert("An error occurred. Please try again.");
             });
-        }
+        });
     </script>
 
 </body>
