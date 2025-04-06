@@ -115,7 +115,7 @@
         const app = firebase.initializeApp(firebaseConfig);
         const storage = firebase.storage();
 
-        document.getElementById('report-form').addEventListener('submit', async function (e) {
+        document.getElementById('report-form').addEventListener('submit', function (e) {
             e.preventDefault();
 
             const yourName = document.getElementById('your-name').value;
