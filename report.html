@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report a User</title>
+
+    <!-- Firebase App SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <!-- Firebase Storage SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
 </head>
 <body>
 
@@ -19,61 +24,53 @@
         <label for="reported-message">Reported Message:</label>
         <textarea id="reported-message" name="reported-message" required></textarea><br>
 
-        <label for="image-upload">Upload Image (Optional):</label>
-        <input type="file" id="image-upload" name="image-upload" accept="image/*"><br>
-
         <button type="submit">Submit Report</button>
     </form>
 
     <script>
+        // Firebase Configuration (replace this with your actual Firebase config)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+
         document.getElementById('report-form').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const yourName = document.getElementById('your-name').value;
             const reportedName = document.getElementById('reported-name').value;
             const reportedMessage = document.getElementById('reported-message').value;
-            const imageFile = document.getElementById('image-upload').files[0];
-
-            let imageUrl = null;
-
-            // If an image was uploaded, upload it and get the URL (using Firebase, AWS, or any other service)
-            if (imageFile) {
-                imageUrl = await uploadImage(imageFile);
-            }
 
             // Prepare the payload to send to Discord
             const reportData = {
                 username: yourName,
                 reportedUser: reportedName,
-                message: reportedMessage,
-                imageUrl: imageUrl
+                message: reportedMessage
             };
 
-            // Send report data to Discord webhook
+            // Send the report to Discord
             sendToDiscord(reportData);
         });
 
-        async function uploadImage(file) {
-            // Implement your image upload logic here (e.g., Firebase Storage, AWS S3, or other services)
-            // Here we'll just use a dummy image URL for now
-            // You can use Firebase Storage or any other image hosting service to store the image and get the URL
-            const dummyImageUrl = "https://www.example.com/your-uploaded-image.jpg"; // Placeholder URL
-            return dummyImageUrl;  // Return the URL of the uploaded image
-        }
-
         function sendToDiscord(reportData) {
             const webhookUrl = "https://discord.com/api/webhooks/1357496704131141793/6mdKBrSxciAGgBQyWJ0iQbeTk0nUYKlbrsQqoKIrNb0gfpKW2LSHS3nU8Ms1_sB9VV53";
-
+            
             const payload = {
                 username: "Report Bot",
                 embeds: [{
                     title: "User Report",
                     description: `**Reported User**: ${reportData.reportedUser}\n**Reported By**: ${reportData.username}\n**Message**: ${reportData.message}`,
                     color: 0xFF0000,
-                    fields: [{
-                        name: "Image (if any):",
-                        value: reportData.imageUrl ? reportData.imageUrl : "No image uploaded"
-                    }],
                     timestamp: new Date(),
                 }]
             };
