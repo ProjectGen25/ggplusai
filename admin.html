@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
+    <title>GG+ Chat</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,29 +13,40 @@
             margin: 0;
             padding: 0;
         }
-        #admin-container {
+        #chat-container {
             width: 90%;
-            max-width: 600px;
+            max-width: 500px;
             margin: 20px auto;
             background: #1e1e1e;
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
-        h1 {
-            font-size: 24px;
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+            text-align: left;
         }
-        .command {
-            margin: 10px 0;
+        .message {
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: #333;
         }
-        input[type="text"], input[type="number"] {
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+            float: right;
+        }
+        #message-input {
+            width: 70%;
             padding: 8px;
-            margin-top: 5px;
-            width: 100%;
             border: none;
             border-radius: 5px;
         }
-        button {
+        #send-btn {
             padding: 8px 15px;
             background: #007BFF;
             border: none;
@@ -43,71 +54,46 @@
             cursor: pointer;
             border-radius: 5px;
         }
-        button:hover {
+        #send-btn:hover {
             background: #0056b3;
         }
     </style>
 </head>
 <body>
 
-    <div id="admin-container">
-        <h1>Welcome, Admin</h1>
-
-        <div class="command">
-            <h3>/ban [username] [reason]</h3>
-            <input type="text" id="ban-user" placeholder="Enter username">
-            <input type="text" id="ban-reason" placeholder="Enter reason">
-            <button id="ban-btn">Ban User</button>
-        </div>
-
-        <div class="command">
-            <h3>/mute [username] [time]</h3>
-            <input type="text" id="mute-user" placeholder="Enter username">
-            <input type="number" id="mute-time" placeholder="Enter time in seconds">
-            <button id="mute-btn">Mute User</button>
-        </div>
-
-        <div class="command">
-            <h3>/search [text]</h3>
-            <input type="text" id="search-text" placeholder="Enter search term">
-            <button id="search-btn">Search Messages</button>
-        </div>
-
-        <div class="command">
-            <h3>/delete [text]</h3>
-            <input type="text" id="delete-text" placeholder="Enter text to delete">
-            <button id="delete-btn">Delete Messages</button>
-        </div>
-
+    <h1>Welcome to GG+ Chat</h1>
+    <div id="chat-container">
+        <div id="messages"></div>
+        <input type="text" id="message-input" placeholder="Type a message...">
+        <button id="send-btn">Send</button>
     </div>
 
     <script>
-        // Add event listeners for the commands
-        document.getElementById("ban-btn").addEventListener("click", () => {
-            const user = document.getElementById("ban-user").value;
-            const reason = document.getElementById("ban-reason").value;
-            banUser(user, reason);
+        // Send message function
+        document.getElementById('send-btn').addEventListener('click', () => {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value;
+            if (message) {
+                sendMessage(message);
+                messageInput.value = '';
+            }
         });
 
-        document.getElementById("mute-btn").addEventListener("click", () => {
-            const user = document.getElementById("mute-user").value;
-            const time = document.getElementById("mute-time").value;
-            muteUser(user, time);
-        });
+        function sendMessage(message) {
+            // Here you would add the logic to store the message and handle commands like /mute, /ban, etc.
+            console.log(message);
+            if (message.startsWith('/ban')) {
+                const [_, user, reason] = message.split(' ');
+                banUser(user, reason);
+            } else if (message.startsWith('/mute')) {
+                const [_, user, time] = message.split(' ');
+                muteUser(user, time);
+            }
+        }
 
-        document.getElementById("search-btn").addEventListener("click", () => {
-            const searchTerm = document.getElementById("search-text").value;
-            searchMessages(searchTerm);
-        });
-
-        document.getElementById("delete-btn").addEventListener("click", () => {
-            const textToDelete = document.getElementById("delete-text").value;
-            deleteMessages(textToDelete);
-        });
-
-        // Ban user function (sends to Discord)
         function banUser(user, reason) {
-            // Send to Discord webhook
+            alert(`${user} has been banned for ${reason}.`);
+            // Send to the Discord webhook
             fetch('https://discord.com/api/webhooks/1357496704131141793/6mdKBrSxciAGgBQyWJ0iQbeTk0nUYKlbrsQqoKIrNb0gfpKW2LSHS3nU8Ms1_sB9VV53', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -117,21 +103,9 @@
             });
         }
 
-        // Mute user function (popup to muted user)
         function muteUser(user, time) {
-            // Send a popup to the muted user
-            alert(`${user} has been muted for ${time} seconds.`);
-            // Logic to mute the user in the chat for `time` seconds (not implemented in this code)
-        }
-
-        // Search messages (dummy implementation)
-        function searchMessages(term) {
-            console.log(`Searching for messages containing: ${term}`);
-        }
-
-        // Delete messages (dummy implementation)
-        function deleteMessages(term) {
-            console.log(`Deleting messages containing: ${term}`);
+            alert(`You have been muted for ${time} seconds.`);
+            // Implement logic to mute the user here (e.g., prevent them from sending messages)
         }
     </script>
 
