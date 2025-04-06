@@ -3,92 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report a User - GG+ Chat</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-        #report-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #1e1e1e;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-        }
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #555;
-        }
-        button {
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <title>Report a User</title>
 </head>
 <body>
 
     <h1>Report a User</h1>
-    <div id="report-container">
-        <form id="report-form">
-            <input type="text" id="reporter-name" placeholder="Your Name" required><br>
-            <input type="text" id="reported-name" placeholder="Reported User's Name" required><br>
-            <textarea id="reported-message" placeholder="What message(s) are you reporting?" rows="5" required></textarea><br>
-            <button type="submit">Submit Report</button>
-        </form>
-    </div>
+
+    <form id="report-form">
+        <label for="your-name">Your Name:</label>
+        <input type="text" id="your-name" name="your-name" required><br>
+
+        <label for="reported-name">Reported User:</label>
+        <input type="text" id="reported-name" name="reported-name" required><br>
+
+        <label for="reported-message">Reported Message:</label>
+        <textarea id="reported-message" name="reported-message" required></textarea><br>
+
+        <label for="image-upload">Upload Image (Optional):</label>
+        <input type="file" id="image-upload" name="image-upload" accept="image/*"><br>
+
+        <button type="submit">Submit Report</button>
+    </form>
 
     <script>
-        document.getElementById("report-form").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent form from refreshing page
+        document.getElementById('report-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-            // Get form data
-            const reporterName = document.getElementById("reporter-name").value;
-            const reportedName = document.getElementById("reported-name").value;
-            const reportedMessage = document.getElementById("reported-message").value;
+            const yourName = document.getElementById('your-name').value;
+            const reportedName = document.getElementById('reported-name').value;
+            const reportedMessage = document.getElementById('reported-message').value;
+            const imageFile = document.getElementById('image-upload').files[0];
 
-            // Prepare the data to send to Discord webhook
+            let imageUrl = null;
+
+            // If an image was uploaded, upload it and get the URL (using Firebase, AWS, or any other service)
+            if (imageFile) {
+                imageUrl = await uploadImage(imageFile);
+            }
+
+            // Prepare the payload to send to Discord
             const reportData = {
-                content: `**Report Received**\n\n**Reporter Name**: ${reporterName}\n**Reported User**: ${reportedName}\n**Reported Message**: ${reportedMessage}`
+                username: yourName,
+                reportedUser: reportedName,
+                message: reportedMessage,
+                imageUrl: imageUrl
             };
 
-            // Send the data to the Discord webhook
-            fetch("https://discord.com/api/webhooks/1357496704131141793/6mdKBrSxciAGgBQyWJ0iQbeTk0nUYKlbrsQqoKIrNb0gfpKW2LSHS3nU8Ms1_sB9VV53", {
-                method: "POST",
+            // Send report data to Discord webhook
+            sendToDiscord(reportData);
+        });
+
+        async function uploadImage(file) {
+            // Implement your image upload logic here (e.g., Firebase Storage, AWS S3, or other services)
+            // Here we'll just use a dummy image URL for now
+            // You can use Firebase Storage or any other image hosting service to store the image and get the URL
+            const dummyImageUrl = "https://www.example.com/your-uploaded-image.jpg"; // Placeholder URL
+            return dummyImageUrl;  // Return the URL of the uploaded image
+        }
+
+        function sendToDiscord(reportData) {
+            const webhookUrl = "https://discord.com/api/webhooks/1357496704131141793/6mdKBrSxciAGgBQyWJ0iQbeTk0nUYKlbrsQqoKIrNb0gfpKW2LSHS3nU8Ms1_sB9VV53";
+
+            const payload = {
+                username: "Report Bot",
+                embeds: [{
+                    title: "User Report",
+                    description: `**Reported User**: ${reportData.reportedUser}\n**Reported By**: ${reportData.username}\n**Message**: ${reportData.message}`,
+                    color: 0xFF0000,
+                    fields: [{
+                        name: "Image (if any):",
+                        value: reportData.imageUrl ? reportData.imageUrl : "No image uploaded"
+                    }],
+                    timestamp: new Date(),
+                }]
+            };
+
+            fetch(webhookUrl, {
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/json"
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(reportData)
+                body: JSON.stringify(payload)
             })
             .then(response => {
                 if (response.ok) {
                     alert("Report submitted successfully!");
-                    window.location.href = "index.html"; // Redirect back to chat
                 } else {
-                    alert("Failed to submit report. Please try again.");
+                    alert("Failed to submit the report.");
                 }
             })
             .catch(error => {
-                console.error("Error:", error);
-                alert("An error occurred. Please try again.");
+                alert("Error sending report: " + error);
             });
-        });
+        }
     </script>
 
 </body>
 </html>
-
