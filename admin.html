@@ -47,34 +47,46 @@
         button:hover {
             background: #0056b3;
         }
+        .fire-button {
+            padding: 8px 20px;
+            background: red;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .fire-button:hover {
+            background: darkred;
+        }
     </style>
 </head>
 <body>
     <div id="admin-container">
         <h1>Welcome, Ethan!</h1>
         <div class="command">
-            <label for="mute">/mute [user] [time (seconds)]:</label>
+            <label for="mute">/mute [user] [time (in seconds)]:</label>
             <input type="text" id="mute" placeholder="e.g. /mute User 60">
+            <button class="fire-button" id="mute-btn">Fire</button>
         </div>
         <div class="command">
-            <label for="ban">/ban [user]:</label>
-            <input type="text" id="ban" placeholder="e.g. /ban User">
+            <label for="ban">/ban [user] [reason]:</label>
+            <input type="text" id="ban" placeholder="e.g. /ban User reason">
+            <button class="fire-button" id="ban-btn">Fire</button>
         </div>
         <div class="command">
             <label for="search">/search [message]:</label>
             <input type="text" id="search" placeholder="e.g. /search hello">
+            <button class="fire-button" id="search-btn">Fire</button>
         </div>
         <div class="command">
             <label for="delete">/delete [message]:</label>
             <input type="text" id="delete" placeholder="e.g. /delete hello">
+            <button class="fire-button" id="delete-btn">Fire</button>
         </div>
         <div class="command">
             <label for="admin">/admin [user]:</label>
             <input type="text" id="admin" placeholder="e.g. /admin User">
-        </div>
-        <div class="command">
-            <button id="shutdown">/shutdown</button>
-            <button id="open">/open</button>
+            <button class="fire-button" id="admin-btn">Fire</button>
         </div>
     </div>
 
@@ -87,14 +99,69 @@
             window.location.href = "index.html"; // Redirect to chat page
         }
 
-        document.getElementById("shutdown").addEventListener("click", () => {
-            alert("Chat is now shut down for all users except admins.");
-            // Implement shutdown logic
+        // Functions for actions
+        function muteUser(user, time) {
+            alert(`Whoops! You've been muted until ${time} seconds!`);
+            // Mute user code goes here
+        }
+
+        function banUser(user, reason) {
+            alert(`You've been banned for reason: ${reason}`);
+            // Send the user info to Discord webhook (example)
+            fetch('https://discord.com/api/webhooks/1357496704131141793/6mdKBrSxciAGgBQyWJ0iQbeTk0nUYKlbrsQqoKIrNb0gfpKW2LSHS3nU8Ms1_sB9VV53', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: `User ${user} has been banned for: ${reason}`
+                })
+            });
+        }
+
+        function searchMessages(text) {
+            alert(`Searching for messages containing: ${text}`);
+            // Implement search logic here
+        }
+
+        function deleteMessages(text) {
+            alert(`Deleting messages containing: ${text}`);
+            // Implement delete logic here
+        }
+
+        function grantAdmin(user) {
+            alert(`${user} has been granted admin privileges.`);
+            // Implement admin logic here
+        }
+
+        // Event listeners for Fire buttons
+        document.getElementById("mute-btn").addEventListener("click", () => {
+            const muteInput = document.getElementById("mute").value.split(" ");
+            const user = muteInput[0];
+            const time = muteInput[1];
+            muteUser(user, time);
         });
 
-        document.getElementById("open").addEventListener("click", () => {
-            alert("Chat is now reopened.");
-            // Implement open logic
+        document.getElementById("ban-btn").addEventListener("click", () => {
+            const banInput = document.getElementById("ban").value.split(" ");
+            const user = banInput[0];
+            const reason = banInput[1];
+            banUser(user, reason);
+        });
+
+        document.getElementById("search-btn").addEventListener("click", () => {
+            const searchInput = document.getElementById("search").value;
+            searchMessages(searchInput);
+        });
+
+        document.getElementById("delete-btn").addEventListener("click", () => {
+            const deleteInput = document.getElementById("delete").value;
+            deleteMessages(deleteInput);
+        });
+
+        document.getElementById("admin-btn").addEventListener("click", () => {
+            const adminInput = document.getElementById("admin").value;
+            grantAdmin(adminInput);
         });
     </script>
 </body>
