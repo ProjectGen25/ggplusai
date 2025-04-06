@@ -1,1 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        #admin-container {
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            font-size: 24px;
+        }
+        .command {
+            margin: 10px 0;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 8px;
+            margin-top: 5px;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            padding: 8px 15px;
+            background: #007BFF;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="admin-container">
+        <h1>Welcome, Ethan!</h1>
+        <div class="command">
+            <label for="mute">/mute [user] [time (seconds)]:</label>
+            <input type="text" id="mute" placeholder="e.g. /mute User 60">
+        </div>
+        <div class="command">
+            <label for="ban">/ban [user]:</label>
+            <input type="text" id="ban" placeholder="e.g. /ban User">
+        </div>
+        <div class="command">
+            <label for="search">/search [message]:</label>
+            <input type="text" id="search" placeholder="e.g. /search hello">
+        </div>
+        <div class="command">
+            <label for="delete">/delete [message]:</label>
+            <input type="text" id="delete" placeholder="e.g. /delete hello">
+        </div>
+        <div class="command">
+            <label for="admin">/admin [user]:</label>
+            <input type="text" id="admin" placeholder="e.g. /admin User">
+        </div>
+        <div class="command">
+            <button id="shutdown">/shutdown</button>
+            <button id="open">/open</button>
+        </div>
+    </div>
 
+    <script>
+        // Admin functionalities (for Ethan and Fortnite.gov only)
+        let username = localStorage.getItem("ggplus_username");
+        const allowedUsers = ["Fortnite.gov", "Ethan+"];
+        if (!allowedUsers.includes(username)) {
+            alert("You are not authorized to access this page.");
+            window.location.href = "index.html"; // Redirect to chat page
+        }
+
+        document.getElementById("shutdown").addEventListener("click", () => {
+            alert("Chat is now shut down for all users except admins.");
+            // Implement shutdown logic
+        });
+
+        document.getElementById("open").addEventListener("click", () => {
+            alert("Chat is now reopened.");
+            // Implement open logic
+        });
+    </script>
+</body>
+</html>
