@@ -4,69 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GG+ Chat</title>
-    <script type="module">
-        // Firebase Configuration
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAUaIpNSyCl8upT6Y4CRV3Kpf1WliY_RgU",
-            authDomain: "gitgamesplus.firebaseapp.com",
-            databaseURL: "https://gitgamesplus-default-rtdb.firebaseio.com",
-            projectId: "gitgamesplus",
-            storageBucket: "gitgamesplus.firebasestorage.app",
-            messagingSenderId: "65136458070",
-            appId: "1:65136458070:web:efa231005bc41e6a743ef7",
-            measurementId: "G-YXYSEMK09X"
-        };
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Ask for username
-        let username = localStorage.getItem("ggplus_username");
-        if (!username) {
-            username = prompt("Enter your name:");
-            localStorage.setItem("ggplus_username", username);
-        }
-
-        // Send message function
-        function sendMessage() {
-            const messageInput = document.getElementById("message-input");
-            const message = messageInput.value.trim();
-            if (message) {
-                const timestamp = new Date().toLocaleString();
-                push(ref(db, "messages"), {
-                    user: username,
-                    text: message,
-                    time: timestamp
-                });
-                messageInput.value = "";
-            }
-        }
-
-        // Load messages function
-        function loadMessages() {
-            const messagesDiv = document.getElementById("messages");
-            onValue(ref(db, "messages"), (snapshot) => {
-                messagesDiv.innerHTML = "";
-                snapshot.forEach(childSnapshot => {
-                    const msg = childSnapshot.val();
-                    const messageElement = document.createElement("div");
-                    messageElement.classList.add("message");
-                    messageElement.innerHTML = `<strong>${msg.user}:</strong> ${msg.text} <span class="timestamp">${msg.time}</span>`;
-                    messagesDiv.appendChild(messageElement);
-                });
-                messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to latest message
-            });
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            document.getElementById("send-btn").addEventListener("click", sendMessage);
-            loadMessages();
-        });
-
-    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -120,14 +63,10 @@
         #send-btn:hover {
             background: #0056b3;
         }
-        /* Admin Link */
-        #admin-link {
-            margin-top: 10px;
-            display: none;
-        }
     </style>
 </head>
 <body>
+
     <h1>Welcome to GG+ Chat</h1>
     <div id="chat-container">
         <div id="messages"></div>
@@ -135,16 +74,109 @@
         <button id="send-btn">Send</button>
     </div>
 
-    <!-- Admin link (only visible if authorized) -->
-    <a href="admin.html" id="admin-link">Go to Admin Panel</a>
-
     <script>
-        // Check if user is authorized for admin link
-        let username = localStorage.getItem("ggplus_username");
-        const allowedUsers = ["Fortnite.gov", "Ethan+"];
-        if (allowedUsers.includes(username)) {
-            document.getElementById("admin-link").style.display = "block"; // Show admin link
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+            projectId: "YOUR_FIREBASE_PROJECT_ID",
+            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+            appId: "YOUR_FIREBASE_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(app);
+
+        // Send message function
+        document.getElementById('send-btn').addEventListener('click', () => {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value;
+            if (message) {
+                sendMessage(message);
+                messageInput.value = '';
+            }
+        });
+
+        function sendMessage(message) {
+            const user = 'example_user'; // Replace this with actual user logic
+            const timestamp = new Date();
+
+            // Store the message in Firebase Firestore
+            db.collection('messages').add({
+                user: user,
+                message: message,
+                timestamp: timestamp
+            })
+            .then(() => {
+                console.log('Message sent to Firestore');
+                displayMessage(user, message, timestamp);
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+            });
         }
+
+        // Display message in the chat
+        function displayMessage(user, message, timestamp) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'timestamp';
+            timestampDiv.innerText = timestamp.toLocaleTimeString();
+
+            messageDiv.innerHTML = `<strong>${user}:</strong> ${message}`;
+            messageDiv.appendChild(timestampDiv);
+            messagesDiv.appendChild(messageDiv);
+        }
+
+        // Listen for new messages
+        db.collection('messages').orderBy('timestamp').onSnapshot(snapshot => {
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                displayMessage(data.user, data.message, data.timestamp);
+            });
+        });
+
+        // Admin commands
+        document.getElementById("send-btn").addEventListener("click", () => {
+            const message = document.getElementById("message-input").value;
+            if (message) {
+                processCommands(message);
+            }
+        });
+
+        function processCommands(message) {
+            if (message.startsWith('/ban')) {
+                const [_, user, reason] = message.split(' ');
+                banUser(user, reason);
+            } else if (message.startsWith('/mute')) {
+                const [_, user, time] = message.split(' ');
+                muteUser(user, time);
+            }
+        }
+
+        function banUser(user, reason) {
+            alert(`${user} has been banned for ${reason}.`);
+            // Send to Discord webhook
+            fetch('https://discord.com/api/webhooks/1357496704131141793/6mdKBrSxciAGgBQyWJ0iQbeTk0nUYKlbrsQqoKIrNb0gfpKW2LSHS3nU8Ms1_sB9VV53', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: `${user} has been banned for: ${reason}`
+                })
+            });
+        }
+
+        function muteUser(user, time) {
+            alert(`You have been muted for ${time} seconds.`);
+            // Implement logic to mute the user here (e.g., prevent them from sending messages)
+        }
+
     </script>
+
 </body>
 </html>
