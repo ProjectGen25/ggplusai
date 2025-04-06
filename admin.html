@@ -42,127 +42,98 @@
             color: white;
             cursor: pointer;
             border-radius: 5px;
-            margin-top: 10px;
         }
         button:hover {
             background: #0056b3;
         }
-        .fire-button {
-            padding: 8px 20px;
-            background: red;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-        .fire-button:hover {
-            background: darkred;
-        }
     </style>
 </head>
 <body>
+
     <div id="admin-container">
-        <h1>Welcome, Ethan!</h1>
+        <h1>Welcome, Admin</h1>
+
         <div class="command">
-            <label for="mute">/mute [user] [time (in seconds)]:</label>
-            <input type="text" id="mute" placeholder="e.g. /mute User 60">
-            <button class="fire-button" id="mute-btn">Fire</button>
+            <h3>/ban [username] [reason]</h3>
+            <input type="text" id="ban-user" placeholder="Enter username">
+            <input type="text" id="ban-reason" placeholder="Enter reason">
+            <button id="ban-btn">Ban User</button>
         </div>
+
         <div class="command">
-            <label for="ban">/ban [user] [reason]:</label>
-            <input type="text" id="ban" placeholder="e.g. /ban User reason">
-            <button class="fire-button" id="ban-btn">Fire</button>
+            <h3>/mute [username] [time]</h3>
+            <input type="text" id="mute-user" placeholder="Enter username">
+            <input type="number" id="mute-time" placeholder="Enter time in seconds">
+            <button id="mute-btn">Mute User</button>
         </div>
+
         <div class="command">
-            <label for="search">/search [message]:</label>
-            <input type="text" id="search" placeholder="e.g. /search hello">
-            <button class="fire-button" id="search-btn">Fire</button>
+            <h3>/search [text]</h3>
+            <input type="text" id="search-text" placeholder="Enter search term">
+            <button id="search-btn">Search Messages</button>
         </div>
+
         <div class="command">
-            <label for="delete">/delete [message]:</label>
-            <input type="text" id="delete" placeholder="e.g. /delete hello">
-            <button class="fire-button" id="delete-btn">Fire</button>
+            <h3>/delete [text]</h3>
+            <input type="text" id="delete-text" placeholder="Enter text to delete">
+            <button id="delete-btn">Delete Messages</button>
         </div>
-        <div class="command">
-            <label for="admin">/admin [user]:</label>
-            <input type="text" id="admin" placeholder="e.g. /admin User">
-            <button class="fire-button" id="admin-btn">Fire</button>
-        </div>
+
     </div>
 
     <script>
-        // Admin functionalities (for Ethan and Fortnite.gov only)
-        let username = localStorage.getItem("ggplus_username");
-        const allowedUsers = ["Fortnite.gov", "Ethan+"];
-        if (!allowedUsers.includes(username)) {
-            alert("You are not authorized to access this page.");
-            window.location.href = "index.html"; // Redirect to chat page
-        }
+        // Add event listeners for the commands
+        document.getElementById("ban-btn").addEventListener("click", () => {
+            const user = document.getElementById("ban-user").value;
+            const reason = document.getElementById("ban-reason").value;
+            banUser(user, reason);
+        });
 
-        // Functions for actions
-        function muteUser(user, time) {
-            alert(`Whoops! You've been muted until ${time} seconds!`);
-            // Mute user code goes here
-        }
+        document.getElementById("mute-btn").addEventListener("click", () => {
+            const user = document.getElementById("mute-user").value;
+            const time = document.getElementById("mute-time").value;
+            muteUser(user, time);
+        });
 
+        document.getElementById("search-btn").addEventListener("click", () => {
+            const searchTerm = document.getElementById("search-text").value;
+            searchMessages(searchTerm);
+        });
+
+        document.getElementById("delete-btn").addEventListener("click", () => {
+            const textToDelete = document.getElementById("delete-text").value;
+            deleteMessages(textToDelete);
+        });
+
+        // Ban user function (sends to Discord)
         function banUser(user, reason) {
-            alert(`You've been banned for reason: ${reason}`);
-            // Send the user info to Discord webhook (example)
+            // Send to Discord webhook
             fetch('https://discord.com/api/webhooks/1357496704131141793/6mdKBrSxciAGgBQyWJ0iQbeTk0nUYKlbrsQqoKIrNb0gfpKW2LSHS3nU8Ms1_sB9VV53', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    content: `User ${user} has been banned for: ${reason}`
+                    content: `${user} has been banned for: ${reason}`
                 })
             });
         }
 
-        function searchMessages(text) {
-            alert(`Searching for messages containing: ${text}`);
-            // Implement search logic here
+        // Mute user function (popup to muted user)
+        function muteUser(user, time) {
+            // Send a popup to the muted user
+            alert(`${user} has been muted for ${time} seconds.`);
+            // Logic to mute the user in the chat for `time` seconds (not implemented in this code)
         }
 
-        function deleteMessages(text) {
-            alert(`Deleting messages containing: ${text}`);
-            // Implement delete logic here
+        // Search messages (dummy implementation)
+        function searchMessages(term) {
+            console.log(`Searching for messages containing: ${term}`);
         }
 
-        function grantAdmin(user) {
-            alert(`${user} has been granted admin privileges.`);
-            // Implement admin logic here
+        // Delete messages (dummy implementation)
+        function deleteMessages(term) {
+            console.log(`Deleting messages containing: ${term}`);
         }
-
-        // Event listeners for Fire buttons
-        document.getElementById("mute-btn").addEventListener("click", () => {
-            const muteInput = document.getElementById("mute").value.split(" ");
-            const user = muteInput[0];
-            const time = muteInput[1];
-            muteUser(user, time);
-        });
-
-        document.getElementById("ban-btn").addEventListener("click", () => {
-            const banInput = document.getElementById("ban").value.split(" ");
-            const user = banInput[0];
-            const reason = banInput[1];
-            banUser(user, reason);
-        });
-
-        document.getElementById("search-btn").addEventListener("click", () => {
-            const searchInput = document.getElementById("search").value;
-            searchMessages(searchInput);
-        });
-
-        document.getElementById("delete-btn").addEventListener("click", () => {
-            const deleteInput = document.getElementById("delete").value;
-            deleteMessages(deleteInput);
-        });
-
-        document.getElementById("admin-btn").addEventListener("click", () => {
-            const adminInput = document.getElementById("admin").value;
-            grantAdmin(adminInput);
-        });
     </script>
+
 </body>
 </html>
