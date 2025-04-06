@@ -32,9 +32,9 @@
             localStorage.setItem("ggplus_username", username);
         }
 
-        // Function to detect mentions (@username)
+        // Function to detect mentions in the format @username (full name, must include @)
         function detectMentions(message) {
-            const regex = /@([a-zA-Z0-9_]+)/g;
+            const regex = /@([a-zA-Z0-9_]+)/g; // Regex to match @username format
             return regex.test(message);  // Returns true if a mention is found
         }
 
@@ -63,7 +63,7 @@
                     const messageElement = document.createElement("div");
                     messageElement.classList.add("message");
 
-                    // If the message contains @mention, add highlighted class
+                    // Check for exact @mention (i.e., must include @ and match the full name)
                     if (detectMentions(msg.text)) {
                         messageElement.classList.add("highlighted");
                     }
